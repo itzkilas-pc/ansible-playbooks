@@ -1,0 +1,49 @@
+---
+- name: uninstalling and reinstalling docker
+  hosts: all
+  tasks:
+    - name: removing a list of packages that we do not need for Docker
+      ansible.builtin.yum:
+        name:
+          - docker
+          - docker-client
+          - docker-client-latest
+          - docker-common
+          - docker-latest
+          - docker-latest-logrotate
+          - docker-logrotate
+          - docker-engine
+          - podman
+          - runc
+        state: absent
+        autoremove: yes
+      tags: tag1
+
+    - name: installing yum-utils for docker
+      ansible.builtin.yum:
+        name: yum-utils
+        state: latest
+      tags: tag2
+
+    - name: configurating yum manager
+      command: yum-config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+      tags: tag3
+
+    - name: reinstalling docker and other packages related to docker
+      ansible.builtin.yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+      tags: tag4
+
+    - name: startingg and enabling docker!!!
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+      tags: tag5
+
